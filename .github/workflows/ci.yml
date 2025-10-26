@@ -1,0 +1,118 @@
+name: CI - Full Test Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # ---------------------------
+  # 1️⃣ TESTS DEL BACKEND
+  # ---------------------------
+  backend-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Run backend unit + integration tests
+        working-directory: backend
+        run: npm test
+
+  # ---------------------------
+  # 2️⃣ TESTS DEL FRONTEND
+  # ---------------------------
+  frontend-tests:
+    runs-on: ubuntu-latest
+    needs: backend-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run frontend unit tests
+        working-directory: frontend
+        run: npm test -- --run
+
+  # ---------------------------
+  # 3️⃣ PRUEBAS E2E (Playwright)
+  # ---------------------------
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Start backend
+        run: |
+          cd backend
+          npm ci
+          nohup npm run dev &   # Servidor backend en background
+          sleep 5               # Espera unos segundos
+
+      - name: Start frontend
+        run: |
+          cd frontend
+          npm ci
+          nohup npm run dev &   # Arranca Vite en background
+          sleep 10              # Espera unos segundos
+
+      - name: Install Playwright browsers
+        run: |
+          cd frontend
+          npx playwright install --with-deps
+
+      - name: Run Playwright E2E tests
+        working-directory: frontend
+        run: npx playwright test --reporter=list
+
+  # ---------------------------
+  # 4️⃣ PRUEBAS DE CARGA (Locust)
+  # ---------------------------
+  load-test:
+    runs-on: ubuntu-latest
+    needs: backend-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Locust
+        run: pip install locust
+
+      - name: Run Locust load test
+        working-directory: backend
+        run: |
+          locust -f locustfile.py --headless -u 10 -r 2 -t 1m --host http://localhost:4000
