@@ -11,17 +11,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout
+      # ---------------------------
+      # 1️⃣ Checkout del repositorio
+      # ---------------------------
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js
+      # ---------------------------
+      # 2️⃣ Configurar Node.js
+      # ---------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # 3️⃣ Install dependencies
+      # ---------------------------
+      # 3️⃣ Instalar dependencias backend y frontend
+      # ---------------------------
       - name: Install backend dependencies
         working-directory: backend
         run: npm ci
@@ -30,34 +36,54 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      # 4️⃣ Install Playwright browsers
+      # ---------------------------
+      # 4️⃣ Instalar Playwright browsers
+      # ---------------------------
       - name: Install Playwright browsers
         working-directory: frontend
         run: npx playwright install --with-deps
 
-      # 5️⃣ Start backend + frontend con concurrently y esperar a que estén listos
+      # ---------------------------
+      # 5️⃣ Instalar herramientas globales y dar permisos
+      # ---------------------------
+      - name: Install concurrently & wait-on
+        run: npm install --save-dev concurrently wait-on
+
+      - name: Dar permisos de ejecución
+        run: chmod +x ./node_modules/.bin/concurrently ./node_modules/.bin/wait-on
+
+      # ---------------------------
+      # 6️⃣ Iniciar backend + frontend y esperar
+      # ---------------------------
       - name: Start backend + frontend
         run: |
-          npm install --save-dev concurrently wait-on
           npx concurrently -k -n BACKEND,FRONTEND "npm run dev --prefix backend" "npm run dev --prefix frontend" &
-          npx wait-on http://localhost:4000 http://localhost:3000 --timeout 60000
+          npx wait-on http://localhost:4000 http://localhost:3000 --timeout 90000
 
-      # 6️⃣ Ejecutar backend tests
+      # ---------------------------
+      # 7️⃣ Ejecutar pruebas backend
+      # ---------------------------
       - name: Run backend tests
         working-directory: backend
         run: npm test
 
-      # 7️⃣ Ejecutar frontend unit tests (Vitest)
+      # ---------------------------
+      # 8️⃣ Ejecutar pruebas frontend (Vitest)
+      # ---------------------------
       - name: Run frontend unit tests
         working-directory: frontend
         run: npm run test -- --run
 
-      # 8️⃣ Ejecutar Playwright E2E
+      # ---------------------------
+      # 9️⃣ Ejecutar pruebas E2E (Playwright)
+      # ---------------------------
       - name: Run Playwright E2E tests
         working-directory: frontend
         run: npx playwright test --reporter=list
 
-      # 9️⃣ Setup Python y Locust
+      # ---------------------------
+      # 🔟 Instalar y ejecutar Locust (pruebas de carga)
+      # ---------------------------
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -66,7 +92,6 @@ jobs:
       - name: Install Locust
         run: pip install locust
 
-      # 🔟 Ejecutar pruebas de carga Locust
       - name: Run load tests
         working-directory: backend
         run: |
