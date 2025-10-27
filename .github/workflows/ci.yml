@@ -37,27 +37,30 @@ jobs:
         run: npm ci
 
       # ---------------------------
-      # 4️⃣ Instalar Playwright browsers
+      # 4️⃣ Instalar navegadores para Playwright
       # ---------------------------
       - name: Install Playwright browsers
         working-directory: frontend
         run: npx playwright install --with-deps
 
       # ---------------------------
-      # 5️⃣ Instalar herramientas globales y dar permisos
+      # 5️⃣ Instalar herramientas y permisos
       # ---------------------------
       - name: Install concurrently & wait-on
         run: npm install --save-dev concurrently wait-on
 
       - name: Dar permisos de ejecución
-        run: chmod +x ./node_modules/.bin/concurrently ./node_modules/.bin/wait-on
+        run: chmod +x ./node_modules/.bin/concurrently ./node_modules/.bin/wait-on || true
 
       # ---------------------------
-      # 6️⃣ Iniciar backend + frontend y esperar
+      # 6️⃣ Iniciar backend + frontend y esperar a que respondan
       # ---------------------------
       - name: Start backend + frontend
         run: |
-          npx concurrently -k -n BACKEND,FRONTEND "npm run dev --prefix backend" "npm run dev --prefix frontend" &
+          npx concurrently -k -n BACKEND,FRONTEND \
+            "npm run dev --prefix backend" \
+            "npm run dev --prefix frontend" &
+          # Esperar a que ambos servidores estén disponibles
           npx wait-on http://localhost:4000 http://localhost:3000 --timeout 90000
 
       # ---------------------------

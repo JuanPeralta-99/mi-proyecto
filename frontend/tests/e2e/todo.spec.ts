@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('usuario crea tarea', async ({ page }) => {
   // URL de tu frontend
-  await page.goto('http://localhost:5173');
+  await page.goto('http://localhost:3000');
 
   // Rellena el input de la nueva tarea
   await page.fill('input[name="title"]', 'Tarea E2E');
