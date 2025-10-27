@@ -44,7 +44,7 @@ jobs:
         run: npx playwright install --with-deps
 
       # ---------------------------
-      # 5️⃣ Instalar herramientas y permisos
+      # 5️⃣ Instalar herramientas y dar permisos
       # ---------------------------
       - name: Install concurrently & wait-on
         run: npm install --save-dev concurrently wait-on
@@ -53,15 +53,13 @@ jobs:
         run: chmod +x ./node_modules/.bin/concurrently ./node_modules/.bin/wait-on || true
 
       # ---------------------------
-      # 6️⃣ Iniciar backend + frontend y esperar a que respondan
+      # 6️⃣ Iniciar backend + frontend y esperar
       # ---------------------------
       - name: Start backend + frontend
         run: |
           npx concurrently -k -n BACKEND,FRONTEND \
             "npm run dev --prefix backend" \
             "npm run dev --prefix frontend" &
-
-          # Esperar a que ambos servidores estén disponibles
           npx wait-on http://localhost:4000 http://localhost:3000 --timeout 90000
 
       # ---------------------------
@@ -97,6 +95,5 @@ jobs:
         run: pip install locust
 
       - name: Run load tests
-        working-directory: backend //
-        run: |
-          locust -f tests/locustfile.py --headless -u 5 -r 1 -t 30s --host=http://localhost:4000
+        working-directory: backend
+        run: locust -f tests/locustfile.py --headless -u 5 -r 1 -t 30s --host=http://localhost:4000
