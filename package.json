@@ -1,0 +1,25 @@
+{
+  "name": "mi-proyecto",
+  "version": "1.0.0",
+  "description": "Este proyecto es un ejemplo de **aplicación fullstack** que incluye un **frontend en React (Vite)**, un **backend en Node.js (Express)** y pruebas automatizadas con **Vitest**, **Playwright** y **Locust** para asegurar la calidad y rendimiento del sistema.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "ci:start": "concurrently -k -n BACKEND,FRONTEND \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JuanPeralta-99/mi-proyecto.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JuanPeralta-99/mi-proyecto/issues"
+  },
+  "homepage": "https://github.com/JuanPeralta-99/mi-proyecto#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "wait-on": "^9.0.1"
+  }
+}
