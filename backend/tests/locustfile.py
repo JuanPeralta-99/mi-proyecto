@@ -1,5 +1,7 @@
+from locust import HttpUser, task, between
+
 class TaskUser(HttpUser):
-    host = "http://localhost:4000"  # <-- Puerto correcto
+    host = "http://localhost:4000"  # Puerto correcto de tu backend
     wait_time = between(1, 3)
 
     @task(2)
