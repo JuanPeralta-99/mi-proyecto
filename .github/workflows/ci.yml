@@ -55,7 +55,7 @@ jobs:
       # ---------------------------
       - name: Wait for backend
         working-directory: frontend
-        run: npx wait-on http://localhost:4000
+        run: npx wait-on http://localhost:4000 --timeout 30000
 
       # ---------------------------
       # 7️⃣ Iniciar frontend en segundo plano
@@ -69,7 +69,7 @@ jobs:
       # ---------------------------
       - name: Wait for frontend
         working-directory: frontend
-        run: npx wait-on http://localhost:3000
+        run: npx wait-on http://localhost:3000 --timeout 30000
 
       # ---------------------------
       # 9️⃣ Ejecutar backend tests
